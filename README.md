@@ -114,6 +114,14 @@ python3 strategy_backtester.py NVDA "Buy below 100, sell above 150 invest $25000
 
 ## Installation
 
+Install all required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Or install manually:
+
 ```bash
 python3 -m pip install pandas numpy pandas-datareader yfinance matplotlib
 ```
