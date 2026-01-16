@@ -35,7 +35,13 @@ def get_stock_data(ticker, period='5y'):
             return None
 
 def parse_strategy(strategy_text):
-    """Parse user strategy into executable rules"""
+    """Parse user strategy into executable rules
+    
+    NOTE: Ideally this would use LLM text-to-code conversion for more flexible
+    natural language understanding, but for the sake of time and simplicity,
+    regex-based parsing is used here. This could be enhanced with an LLM API
+    call to convert arbitrary strategy descriptions into executable code.
+    """
     strategy = {
         'buy_conditions': [],
         'sell_conditions': [],
