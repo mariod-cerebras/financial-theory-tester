@@ -10,6 +10,8 @@ import matplotlib.dates as mdates
 from datetime import datetime, timedelta
 import sys
 import re
+import subprocess
+import os
 
 def get_stock_data(ticker, period='5y'):
     """Fetch stock data using pandas-datareader"""
@@ -173,16 +175,10 @@ def backtest_strategy(df, strategy):
     in_position = False
     entry_price = 0
     
-    print(f"\n{'='*60}")
-    print(f"BACKTESTING STRATEGY: {strategy['description']}")
-    print(f"Initial Capital: ${cash:,.2f}")
-    print(f"{'='*60}\n")
-    
     for i, (date, row) in enumerate(df.iterrows()):
         current_price = row['Close']
         
         if not in_position:
-            # Check buy conditions
             should_buy, reason = check_buy_conditions(df, date, strategy)
             if should_buy:
                 shares = int(cash / current_price)
@@ -196,9 +192,7 @@ def backtest_strategy(df, strategy):
                     'shares': shares,
                     'reason': reason
                 })
-                print(f"BUY: {date.strftime('%Y-%m-%d')} - ${current_price:.2f} ({shares} shares) - {reason}")
         else:
-            # Check sell conditions
             should_sell, reason = check_sell_conditions(df, date, strategy, entry_price)
             if should_sell:
                 cash = cash + (shares * current_price)
@@ -209,23 +203,13 @@ def backtest_strategy(df, strategy):
                     'shares': shares,
                     'reason': reason
                 })
-                print(f"SELL: {date.strftime('%Y-%m-%d')} - ${current_price:.2f} ({shares} shares) - ${cash:,.2f} - {reason}")
                 shares = 0
                 in_position = False
         
-        # Calculate portfolio value
         portfolio_value.append(cash + (shares * current_price))
     
-    # Final position
     final_value = portfolio_value[-1]
     total_return = ((final_value - strategy['initial_capital']) / strategy['initial_capital']) * 100
-    
-    print(f"\n{'='*60}")
-    print(f"FINAL RESULTS:")
-    print(f"Final Portfolio Value: ${final_value:,.2f}")
-    print(f"Total Return: {total_return:+.2f}%")
-    print(f"Total Trades: {len(trades)}")
-    print(f"{'='*60}\n")
     
     return portfolio_value, trades, final_value, total_return
 
@@ -278,8 +262,8 @@ def plot_backtest_results(df, portfolio_value, trades, ticker, strategy):
     plt.tight_layout()
     filename = f'{ticker}_strategy_backtest.png'
     plt.savefig(filename, dpi=300, bbox_inches='tight')
-    print(f"Chart saved as: {filename}")
     plt.close()
+    return filename
 
 def main():
     if len(sys.argv) < 3:
@@ -288,29 +272,27 @@ def main():
         print("  'Buy when it dips 10 percent'")
         print("  'Buy when RSI below 30, sell when RSI above 70'")
         print("  'Buy when price drops 5 percent, sell when it rises 10 percent'")
-        print("  'Buy below $100, sell above $120'")
+        print("  'Buy below 100, sell above 120'")
         sys.exit(1)
     
     ticker = sys.argv[1].upper()
     strategy_text = ' '.join(sys.argv[2:])
     
-    print(f"Fetching data for {ticker}...")
     df = get_stock_data(ticker)
     
     if df is None or df.empty:
         print(f"Error: Could not fetch data for {ticker}")
         sys.exit(1)
     
-    print(f"Data loaded: {len(df)} days from {df.index[0].strftime('%Y-%m-%d')} to {df.index[-1].strftime('%Y-%m-%d')}")
-    
     strategy = parse_strategy(strategy_text)
-    print(f"\nParsed Strategy:")
-    print(f"  Buy conditions: {len(strategy['buy_conditions'])}")
-    print(f"  Sell conditions: {len(strategy['sell_conditions'])}")
-    print(f"  Initial capital: ${strategy['initial_capital']:,.2f}")
-    
     portfolio_value, trades, final_value, total_return = backtest_strategy(df, strategy)
-    plot_backtest_results(df, portfolio_value, trades, ticker, strategy)
+    filename = plot_backtest_results(df, portfolio_value, trades, ticker, strategy)
+    
+    if filename and os.path.exists(filename):
+        try:
+            subprocess.run(['open', filename], check=True)
+        except Exception as e:
+            print(f"Could not open chart: {e}")
 
 if __name__ == '__main__':
     main()
