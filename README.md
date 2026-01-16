@@ -31,7 +31,7 @@ python3 strategy_backtester.py <TICKER> "<STRATEGY>"
 **Buy on dips, sell on rises:**
 
 ```bash
-python3 strategy_backtester.py AAPL "Buy when it dips 10 percent, sell when it rises 10 percent"
+python3 strategy_backtester.py AAPL "Buy when it dips 10%, sell when it rises 10%"
 ```
 
 **Price-based strategy:**
@@ -46,18 +46,21 @@ python3 strategy_backtester.py NVDA "Buy below 100, sell above 150"
 python3 strategy_backtester.py TSLA "Buy when RSI below 30, sell when RSI above 70"
 ```
 
-**Combined strategy:**
+**Flexible language:**
 
 ```bash
-python3 strategy_backtester.py MSFT "Buy when it dips 5 percent, sell when it rises 8 percent"
+python3 strategy_backtester.py MSFT "Buy when price falls 5%, sell when it increases 8%"
+python3 strategy_backtester.py AAPL "Buy when it declines 7.5%, sell when it gains 12%"
 ```
 
 ## Supported Strategy Types
 
 ### Price Dip Strategies
 
-- "Buy when it dips 10 percent"
-- "Buy when price drops 5 percent"
+- "Buy when it dips 10%"
+- "Buy when price drops 5%"
+- "Buy when it falls 7.5%"
+- "Buy when it declines 10 percent"
 
 ### Price Target Strategies
 
@@ -71,8 +74,30 @@ python3 strategy_backtester.py MSFT "Buy when it dips 5 percent, sell when it ri
 
 ### Percentage Gain Strategies
 
-- "Buy when it dips 10 percent, sell when it rises 15 percent"
-- "Buy when price drops 5 percent, sell when it gains 8 percent"
+- "Buy when it dips 10%, sell when it rises 15%"
+- "Buy when price drops 5%, sell when it gains 8%"
+- "Buy when it falls 7%, sell when it increases 12%"
+- "Buy when it declines 5%, sell when it profits 10%"
+
+### Flexible Language Options
+
+The parser understands various ways to express the same concept:
+
+**For price drops:**
+
+- dips, drops, falls, declines
+
+**For price increases:**
+
+- rises, gains, increases, profits
+
+**For percentages:**
+
+- 5%, 5 percent, 7.5%, 7.5 percent
+
+**For capital:**
+
+- with $10000, with 10000 initial capital, invest $10000
 
 ### Combined Strategies
 
@@ -117,7 +142,8 @@ The backtester generates a comprehensive visualization showing:
 Include your starting capital in the strategy:
 
 ```bash
-python3 strategy_backtester.py AAPL "Buy when it dips 10 percent with $50000 initial capital"
+python3 strategy_backtester.py AAPL "Buy when it dips 10% with $50000"
+python3 strategy_backtester.py NVDA "Buy below 100, sell above 150 invest $25000"
 ```
 
 ## How It Works

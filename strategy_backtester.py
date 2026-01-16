@@ -45,11 +45,17 @@ def parse_strategy(strategy_text):
     
     strategy_text = strategy_text.lower()
     
-    # Parse buy conditions
-    if 'dip' in strategy_text or 'drop' in strategy_text:
-        match = re.search(r'(\d+)\s*percent', strategy_text)
+    # Helper function to extract percentage
+    def extract_percentage(text):
+        match = re.search(r'(\d+\.?\d*)\s*[%]|(\d+\.?\d*)\s*percent', text)
         if match:
-            dip_percent = float(match.group(1))
+            return float(match.group(1) or match.group(2))
+        return None
+    
+    # Parse buy conditions
+    if 'dip' in strategy_text or 'drop' in strategy_text or 'fall' in strategy_text or 'decline' in strategy_text:
+        dip_percent = extract_percentage(strategy_text)
+        if dip_percent:
             strategy['buy_conditions'].append({
                 'type': 'dip',
                 'percent': dip_percent
@@ -77,10 +83,9 @@ def parse_strategy(strategy_text):
             })
     
     # Parse sell conditions
-    if 'rise' in strategy_text or 'gain' in strategy_text:
-        match = re.search(r'rise\s*(\d+)\s*percent|gain\s*(\d+)\s*percent', strategy_text)
-        if match:
-            rise_percent = float(match.group(1) or match.group(2))
+    if 'rise' in strategy_text or 'gain' in strategy_text or 'increase' in strategy_text or 'profit' in strategy_text:
+        rise_percent = extract_percentage(strategy_text)
+        if rise_percent:
             strategy['sell_conditions'].append({
                 'type': 'rise',
                 'percent': rise_percent
@@ -105,7 +110,7 @@ def parse_strategy(strategy_text):
             })
     
     # Parse initial capital
-    match = re.search(r'\$?(\d+\.?\d*)\s*(?:initial|starting|capital|money)', strategy_text)
+    match = re.search(r'\$?(\d+\.?\d*)\s*(?:initial|starting|capital|money|with|invest)', strategy_text)
     if match:
         strategy['initial_capital'] = float(match.group(1))
     
